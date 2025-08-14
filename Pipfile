@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+beautifulsoup4 = "*"
+langchain = "*"
+langgraph = "*"
+langchainhub = "*"
+langchain-community = "*"
+tavily-python = "*"
+pinecone = "*"
+isort = "*"
+pytest = "*"
+chromadb = "*"
+langchain-openai = "*"
+langchain-tavily = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+pydantic = "*"
+python-multipart = "*"
+python-dotenv = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
+python_full_version = "3.11.4"
