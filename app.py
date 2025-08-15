@@ -1,59 +1,54 @@
-"""
-Wrapper for graph modules to handle lazy initialization
-"""
 import os
-from typing import Any, Dict
+from fastapi import FastAPI
+import uvicorn
+
+print("🚀 Starting super simple FastAPI app...")
+print(f"🔍 OPENAI_API_KEY present: {bool(os.getenv('OPENAI_API_KEY'))}")
+
+app = FastAPI(title="FlowerBackend Simple API")
 
 
-class LazyGraphWrapper:
-    """Wrapper that delays graph initialization until first use"""
+@app.get("/")
+def root():
+    return {
+        "message": "FlowerBackend Simple API is running!",
+        "openai_key_present": bool(os.getenv("OPENAI_API_KEY")),
+        "environment_count": len([k for k in os.environ.keys() if 'API' in k or 'KEY' in k])
+    }
 
-    def __init__(self, module_name: str):
-        self.module_name = module_name
-        self._app = None
-        self._initialized = False
 
-    def _ensure_initialized(self):
-        """Initialize the graph app only when needed"""
-        if self._initialized:
-            return
+@app.get("/health")
+def health():
+    return {"status": "healthy", "service": "flowerbackend"}
 
-        print(f"🔄 Lazy loading {self.module_name}...")
 
-        # Ensure environment variables are set
-        if not os.getenv("OPENAI_API_KEY"):
-            raise ValueError(f"OPENAI_API_KEY not found when initializing {self.module_name}")
+@app.get("/env-debug")
+def env_debug():
+    """Debug endpoint to check environment variables"""
+    env_vars = {}
+    for key, value in os.environ.items():
+        if any(keyword in key.upper() for keyword in ['API', 'KEY', 'OPENAI', 'LANG']):
+            env_vars[key] = "***SET***" if value else "***NOT SET***"
 
-        try:
-            # Import the graph module
-            module = __import__(f"{self.module_name}.graph", fromlist=["app"])
+    return {
+        "environment_variables": env_vars,
+        "total_env_vars": len(os.environ),
+        "app_working": True
+    }
 
-            if hasattr(module, "app"):
-                self._app = module.app
-                print(f"✅ Successfully lazy-loaded {self.module_name}")
-            else:
-                raise AttributeError(f"No 'app' attribute found in {self.module_name}.graph")
 
-        except Exception as e:
-            print(f"❌ Failed to lazy-load {self.module_name}: {e}")
-            raise
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
+    host = "0.0.0.0"
 
-        self._initialized = True
+    print(f"🚀 Starting on {host}:{port}")
+    print(
+        f"📋 Environment variables with 'API' or 'KEY': {len([k for k in os.environ.keys() if 'API' in k or 'KEY' in k])}")
 
-    def invoke(self, input: Dict[str, Any], config: Dict[str, Any] = None):
-        """Invoke the wrapped graph app"""
-        self._ensure_initialized()
-        return self._app.invoke(input=input, config=config or {})
-
-    def stream(self, input: Dict[str, Any], config: Dict[str, Any] = None):
-        """Stream from the wrapped graph app"""
-        self._ensure_initialized()
-        if hasattr(self._app, 'stream'):
-            return self._app.stream(input=input, config=config or {})
-        else:
-            raise AttributeError(f"Graph app in {self.module_name} has no 'stream' method")
-
-    def __getattr__(self, name):
-        """Delegate other method calls to the wrapped app"""
-        self._ensure_initialized()
-        return getattr(self._app, name)
+    uvicorn.run(
+        "app:app",  # This should match the filename
+        host=host,
+        port=port,
+        reload=False,
+        log_level="info"
+    )
