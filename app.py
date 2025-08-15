@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import uvicorn
@@ -88,6 +89,19 @@ print(f"✅ Created {len(AVAILABLE_GRAPHS)} lazy graph wrappers")
 
 # Create FastAPI app
 app = FastAPI(title="FlowerBackend API", description="LangGraph FastAPI Backend")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",      # Local development
+        "https://aiflowershop.com",   # Production frontend
+        # Add any other frontend origins you need
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 
 class GraphRequest(BaseModel):
