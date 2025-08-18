@@ -220,6 +220,12 @@ async def weburl_endpoint(request: GraphRequest):
     """Convenience endpoint for weburl graph"""
     return await invoke_graph("weburl", request)
 
+# Convenience endpoints for each graph
+@app.post("/pdfqara")
+async def weburl_endpoint(request: GraphRequest):
+    """Convenience endpoint for weburl graph"""
+    return await invoke_graph("pdfqara", request)
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))

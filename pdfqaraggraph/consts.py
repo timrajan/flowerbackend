@@ -1,0 +1,2 @@
+RETRIEVE = "retrieve"
+GENERATE = "generate"

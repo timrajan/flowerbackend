@@ -21,6 +21,9 @@ uvicorn = {extras = ["standard"], version = "*"}
 pydantic = "*"
 python-multipart = "*"
 python-dotenv = "*"
+langchain-pinecone = "*"
+ocrmypdf = "*"
+pypdf = "*"
 
 [dev-packages]
 
