@@ -22,7 +22,7 @@ import time
 
 def convert_docs():
     input_pdf = "/Users/timothyrajanalex/PycharmProjects/PythonProject/flowerbackend/pdfqaraggraph/flowers.pdf"
-    output_pdf = "/Users/timothyrajanalex/PycharmProjects/PythonProject/flowerbackend/pdfqaraggraph/Cars_OCR.pdf"
+    output_pdf = "/Users/timothyrajanalex/PycharmProjects/PythonProject/flowerbackend/pdfqaraggraph/flowers_OCR.pdf"
 
     try:
         ocrmypdf.ocr(input_pdf, output_pdf, deskew=True, force_ocr=True)
@@ -292,7 +292,7 @@ retriever = vectorstore.as_retriever(
 
 if __name__ == "__main__":
     #convert_docs()
-    upload_document_pipeline("/Users/timothyrajanalex/PycharmProjects/PythonProject/flowerbackend/pdfqaraggraph/flowers_OCR.pdf","flower")
+    upload_document_pipeline("/Users/timothyrajanalex/PycharmProjects/PythonProject/flowerbackend/pdfqaraggraph/Cars_OCR.pdf","flower")
 
 
 

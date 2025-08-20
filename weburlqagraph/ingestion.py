@@ -8,6 +8,9 @@ from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 import chromadb
 import os
+import asyncio
+from playwright.async_api import async_playwright
+from langchain.schema import Document
 
 load_dotenv()
 _client: ClientAPI | None = None
@@ -26,6 +29,49 @@ def get_chroma_client() -> ClientAPI:
     return _client
 
 
+async def load_url_with_playwright(url):
+    """Load a single URL with Playwright - mimics WebBaseLoader.load()"""
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+
+        await page.set_extra_http_headers({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        })
+
+        try:
+            await page.goto(url, wait_until='networkidle')
+            await page.wait_for_timeout(2000)
+
+            text_content = await page.evaluate('() => document.body.innerText')
+
+            doc = Document(
+                page_content=text_content,
+                metadata={"source": url}
+            )
+
+            await browser.close()
+            return [doc]
+
+        except Exception as e:
+            print(f"Error loading {url}: {str(e)}")
+            await browser.close()
+            return []
+
+
+async def load_all_urls(urls):
+    """Load all URLs concurrently"""
+    tasks = [load_url_with_playwright(url) for url in urls]
+    return await asyncio.gather(*tasks)
+
+
+
+
+
+
+
+
+
 def get_chroma_collection() -> Collection:
     global _collection
     if _collection is None:
@@ -39,6 +85,17 @@ def get_chroma_collection() -> Collection:
 # Load and process documents
 print("Loading documents...")
 urls = [
+    "https://aiflowershop.com/",
+    "https://aiflowershop.com/contact",
+    "https://aiflowershop.com/blog",
+    "https://aiflowershop.com/chat",
+    "https://aiflowershop.com/qa",
+    "https://aiflowershop.com/bouquets",
+    "https://aiflowershop.com/pots",
+    "https://aiflowershop.com/fresh-flowers",
+    "https://aiflowershop.com/accessories",
+    "https://aiflowershop.com/specialty",
+    "https://aiflowershop.com/preserved",
     "https://aiflowershop.com/blog/1",
     "https://aiflowershop.com/blog/2",
     "https://aiflowershop.com/blog/3",
@@ -47,7 +104,11 @@ urls = [
     "https://aiflowershop.com/blog/6",
 ]
 
-docs = [WebBaseLoader(url).load() for url in urls]
+# docs = [WebBaseLoader(url).load() for url in urls]
+# docs_list = [item for sublist in docs for item in sublist]
+# print(f"Loaded {len(docs_list)} documents")
+
+docs = asyncio.run(load_all_urls(urls))
 docs_list = [item for sublist in docs for item in sublist]
 print(f"Loaded {len(docs_list)} documents")
 

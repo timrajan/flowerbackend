@@ -24,6 +24,7 @@ python-dotenv = "*"
 langchain-pinecone = "*"
 ocrmypdf = "*"
 pypdf = "*"
+playwright = "*"
 
 [dev-packages]
 
